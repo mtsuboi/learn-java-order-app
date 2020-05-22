@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+    <!-- サーブレットの定義 -->
+    <servlet>
+        <servlet-name>itemList</servlet-name>
+        <servlet-class>com.example.order_app.handler.ItemListServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>itemEntry</servlet-name>
+        <servlet-class>com.example.order_app.handler.ItemEntryServlet</servlet-class>
+    </servlet>
+
+    <!-- サーブレットとURLのマッピング -->
+    <servlet-mapping>
+        <servlet-name>itemList</servlet-name>
+        <url-pattern>/item_list</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>itemEntry</servlet-name>
+        <url-pattern>/item_entry</url-pattern>
+    </servlet-mapping>
+
+    <!-- コンテキストルートにアクセスしたときに読み込むファイル -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- Spring Framework の設定ファイル -->
+    <context-param>
+        <param-name>contextConfiguration</param-name>
+        <param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+
+    <!-- Spring Framework の設定ファイルを読み込み -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+</web-app>
