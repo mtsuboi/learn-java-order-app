@@ -38,9 +38,8 @@ public class ItemListServlet extends HttpServlet {
 
 		String[] parsedCommand = req.getParameter("command").split(" ");
 
-		if(parsedCommand[0] == "delete") {
+		if("delete".equals(parsedCommand[0])) {
 			// 商品を削除する
-//			String itemId = req.getParameter("item_id");
 			String itemId = parsedCommand[1];
 			logic.delete(itemId);
 		}

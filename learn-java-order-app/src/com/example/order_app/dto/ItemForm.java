@@ -1,10 +1,17 @@
 package com.example.order_app.dto;
 
 public class ItemForm {
+	private String mode;
 	private String itemId;
 	private String itemName;
 	private String itemPrice;
 
+	public String getMode() {
+		return mode;
+	}
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
 	public String getItemId() {
 		return itemId;
 	}

@@ -22,7 +22,7 @@ public class ItemEntryServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String itemId = req.getParameter("item_id");
-		if(itemId.isEmpty()) {
+		if(itemId == null || itemId.isEmpty()) {
 			// item_idパラメータなしの場合は新規モード
 			req.setAttribute("mode", "new");
 		} else {
@@ -54,6 +54,7 @@ public class ItemEntryServlet extends HttpServlet {
 
 		// 入力検証
 		ItemForm itemForm = new ItemForm();
+		itemForm.setMode(req.getParameter("mode"));
 		itemForm.setItemId(req.getParameter("item_id"));
 		itemForm.setItemName(req.getParameter("item_name"));
 		itemForm.setItemPrice(req.getParameter("item_price"));
@@ -61,17 +62,19 @@ public class ItemEntryServlet extends HttpServlet {
 		List<String> errors = logic.validate(itemForm);
 
 		if(errors == null || errors.isEmpty()) {
-			// エラーが無ければDBに追加して商品一覧画面に戻る
-			Item item = new Item();
-			item.setItemId(itemForm.getItemId());
-			item.setItemName(itemForm.getItemName());
-			item.setItemPrice(Integer.parseInt(itemForm.getItemPrice()));
-			logic.add(item);
+			// エラーが無ければDBに保存して商品一覧画面に戻る
+			logic.save(itemForm);
 
 			resp.sendRedirect("/item_list");
 		} else {
 			// エラーがあったらエラーメッセージをフォームに表示
 			req.setAttribute("errors", errors);
+
+			// フォームに入力値を戻す
+			req.setAttribute("mode", itemForm.getMode());
+			req.setAttribute("item_id", itemForm.getItemId());
+			req.setAttribute("item_name", itemForm.getItemName());
+			req.setAttribute("item_price", itemForm.getItemPrice());
 
 			RequestDispatcher dispatcher = req.getRequestDispatcher("item_entry.jsp");
 			dispatcher.forward(req, resp);

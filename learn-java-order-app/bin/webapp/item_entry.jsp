@@ -14,7 +14,12 @@
 </c:forEach>
 <form action="item_entry" method="post">
 <input type="hidden" name="mode" id="mode" value="${mode}">
-商品ID : <input type="text" name="item_id" id="item_id" value="${item_id}" <c:if test="${mode == 'update'}">disabled</c:if> ><br>
+商品ID : <input type="text" name="item_id" id="item_id" value="${item_id}"
+           <c:if test="${mode == 'update'}">
+             readonly="readonly"
+             style="background-color : lightgray;"
+           </c:if>
+         ><br>
 商品名 : <input type="text" name="item_name" id="item_name" value="${item_name}"><br>
 単価　 : <input type="number" name="item_price" id="item_price" value="${item_price}">円<br>
 <input type="submit" value="登録">

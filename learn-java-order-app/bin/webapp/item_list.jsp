@@ -10,7 +10,7 @@
 <body>
 <h1>商品マスタ</h1>
 <form name="item_form" action="item_list" method="post">
-<input type="text" id="command" name="command" value="">
+<input type="hidden" id="command" name="command" value="">
 <a href="item_entry">新規登録</a>
 <table border="1">
 <thead>
@@ -25,13 +25,7 @@
 <td><c:out value="${item.itemName}" /></td>
 <td><c:out value="${item.itemPrice}" />円</td>
 <td>
-<input type="submit" value="削除" onclick="item_form.command.value='delete ${item.itemId}';return;">
-<!--
-<form action="item_list" method="post" onSubmit="return confirm('[${item.itemId}] ${item.itemName} を削除します。よろしいですか？')">
-<input type="hidden" name="item_id" id="item_id" value="${item.itemId}">
-<input type="submit" value="削除">
-</form>
--->
+<input type="submit" value="削除" onclick="item_form.command.value='delete ${item.itemId}';">
 </td>
 </tr>
 </c:forEach>

@@ -16,7 +16,7 @@ public interface ItemLogic {
 	List<String> validate(final ItemForm itemForm);
 
 	// 商品を追加する
-	void add(final Item item);
+	void save(final ItemForm itemForm);
 
 	// 商品を削除する
 	void delete(final String itemId);
