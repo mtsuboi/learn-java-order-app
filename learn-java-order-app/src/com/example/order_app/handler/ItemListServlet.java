@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.example.order_app.constants.FormCommand;
 import com.example.order_app.dto.Item;
 import com.example.order_app.logic.ItemLogic;
 
@@ -36,11 +37,10 @@ public class ItemListServlet extends HttpServlet {
 		WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(this.getServletContext());
 		ItemLogic logic = (ItemLogic) context.getBean("aopItemLogic");
 
-		String[] parsedCommand = req.getParameter("command").split(" ");
-
-		if("delete".equals(parsedCommand[0])) {
+		String command = req.getParameter("command");
+		if(FormCommand.valueOf(command) == FormCommand.DELETE) {
 			// 商品を削除する
-			String itemId = parsedCommand[1];
+			String itemId = req.getParameter("item_id");
 			logic.delete(itemId);
 		}
 

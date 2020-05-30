@@ -12,9 +12,6 @@ public interface ItemLogic {
 	// 商品をitem_idで検索する
 	Item findById(final String itemId);
 
-	// 商品マスタフォームをを入力検証する
-	List<String> validate(final ItemForm itemForm);
-
 	// 商品を追加する
 	void save(final ItemForm itemForm);
 
