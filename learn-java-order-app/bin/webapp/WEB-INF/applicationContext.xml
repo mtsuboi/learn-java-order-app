@@ -1,44 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-    <!-- データベース接続(1) -->
+    <!-- データベース接続 -->
+    <!-- MySQL -->
     <!--
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="orgDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://localhost/learn-java?serverTimezone=JST&amp;useUnicode=true&amp;characterEncoding=utf8"/>
         <property name="username" value="root"/>
         <property name="password" value="root"/>
     </bean>
     -->
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <!-- H2DB(テスト用) -->
+    <bean id="orgDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="org.h2.Driver"/>
         <property name="url" value="jdbc:h2:./db/order_db"/>
         <property name="username" value="sa"/>
         <property name="password" value=""/>
     </bean>
 
-    <!-- データアクセス(2) -->
+    <!-- トランザクションマネージャ -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="orgDataSource"/>
+    </bean>
+
+    <!-- データソースプロキシ(データソースをこれでラップしてやるとgetConnection時に共有されたコネクションを取得できる) -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg ref="orgDataSource" />
+    </bean>
+
+    <!-- トランザクション実行クラス(これをAOP設定するとトランザクションが適用される) -->
+    <bean id="dbManager" class="com.example.order_app.dbmanager.DbManager">
+    	<property name="txManager" ref="txManager"/>
+    </bean>
+
+    <!-- データアクセス(商品) -->
     <bean id="itemDao" class="com.example.order_app.access.ItemOnDbImpl">
         <property name="ds" ref="dataSource"/>
     </bean>
 
-    <!-- ビジネスロジック(3) -->
-    <bean id="itemLogic" class="com.example.order_app.logic.ItemLogicImpl">
-        <property name="item" ref="itemDao"/>
+    <!-- データアクセス(受注) -->
+    <bean id="orderDao" class="com.example.order_app.access.OrderOnDbImpl">
+        <property name="ds" ref="dataSource"/>
     </bean>
 
-    <!-- ビジネスロジック(4) -->
+    <!-- データアクセス(受注明細) -->
+    <bean id="orderDetailDao" class="com.example.order_app.access.OrderDetailOnDbImpl">
+        <property name="ds" ref="dataSource"/>
+    </bean>
+
+    <!-- ビジネスロジック(商品) -->
+    <bean id="itemLogic" class="com.example.order_app.logic.ItemLogicImpl">
+        <property name="item" ref="aopItemDao"/>
+    </bean>
+
+    <!-- ビジネスロジック(商品バリデータ) -->
     <bean id="itemValidator" class="com.example.order_app.logic.ItemValidatorImpl">
         <property name="item" ref="itemDao"/>
     </bean>
 
-    <!-- ロギングクラス(1) -->
+    <!-- ビジネスロジック(受注) -->
+    <bean id="orderLogic" class="com.example.order_app.logic.OrderLogicImpl">
+        <property name="order" ref="aopOrderDao"/>
+        <property name="orderDetail" ref="aopOrderDetailDao"/>
+    </bean>
+
+    <!-- ビジネスロジック(受注バリデータ) -->
+    <bean id="orderValidator" class="com.example.order_app.logic.OrderValidatorImpl">
+        <property name="item" ref="itemDao"/>
+    </bean>
+
+    <!-- ロギングクラス -->
     <bean id="logger" class="com.example.order_app.logging.Logger">
     </bean>
 
-    <!-- AOP設定（データアクセス）(2) -->
+    <!-- AOP設定 データアクセス（商品） -->
     <bean id="aopItemDao" class="org.springframework.aop.framework.ProxyFactoryBean">
     	<property name="target" ref="itemDao">
     	</property>
@@ -49,13 +94,48 @@
     	</property>
     </bean>
 
-    <!-- AOP設定（ビジネスロジック）(3) -->
+    <!-- AOP設定 ビジネスロジック（商品） -->
     <bean id="aopItemLogic" class="org.springframework.aop.framework.ProxyFactoryBean">
         <property name="target" ref="itemLogic">
         </property>
         <property name="interceptorNames">
             <list>
                 <value>logger</value>
+                <value>dbManager</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- AOP設定 データアクセス（受注） -->
+    <bean id="aopOrderDao" class="org.springframework.aop.framework.ProxyFactoryBean">
+    	<property name="target" ref="orderDao">
+    	</property>
+    	<property name="interceptorNames">
+    		<list>
+    			<value>logger</value>
+    		</list>
+    	</property>
+    </bean>
+
+    <!-- AOP設定 データアクセス（受注明細） -->
+    <bean id="aopOrderDetailDao" class="org.springframework.aop.framework.ProxyFactoryBean">
+    	<property name="target" ref="orderDetailDao">
+    	</property>
+    	<property name="interceptorNames">
+    		<list>
+    			<value>logger</value>
+    		</list>
+    	</property>
+    </bean>
+
+    <!-- AOP設定 ビジネスロジック（受注） -->
+    <bean id="aopOrderLogic" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="orderLogic">
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>logger</value>
+                <value>dbManager</value>
             </list>
         </property>
     </bean>

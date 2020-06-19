@@ -1,6 +1,7 @@
 package com.example.order_app.handler;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -41,7 +42,12 @@ public class ItemListServlet extends HttpServlet {
 		if(FormCommand.valueOf(command) == FormCommand.DELETE) {
 			// 商品を削除する
 			String itemId = req.getParameter("item_id");
-			logic.delete(itemId);
+			try {
+				logic.delete(itemId);
+			} catch (SQLException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
 		}
 
 		resp.sendRedirect("/item_list");

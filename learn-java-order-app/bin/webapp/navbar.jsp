@@ -18,7 +18,7 @@
 			</li>
 			<li class="nav-item"><a class="nav-link" href="item_list">商品マスタ</a>
 			</li>
-			<li class="nav-item"><a class="nav-link" href="#">受注管理</a></li>
+			<li class="nav-item"><a class="nav-link" href="order_list">受注管理</a></li>
 		</ul>
 	</div>
 </nav>

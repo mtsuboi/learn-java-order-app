@@ -14,26 +14,6 @@
 <title>商品マスタ</title>
 </head>
 <body>
-	<script src="js/jquery-3.5.1.slim.min.js"></script>
-	<script src="js/bootstrap.bundle.min.js"></script>
-
-	<!-- 商品を削除する隠しフォームとJavascript -->
-	<form name="delete_form" action="item_list" method="post">
-		<input type="hidden" id="command" name="command" value="DELETE">
-		<input type="hidden" id="item_id" name="item_id">
-	</form>
-	<script type="text/javascript">
-		function item_delete(item_id, item_name) {
-			if(confirm('[' + item_id + '] ' + item_name + ' を削除します。よろしいですか？')) {
-				delete_form.item_id.value = item_id;
-				delete_form.submit();
-				return true;
-			} else {
-				return false;
-			}
-		}
-	</script>
-
 	<%@ include file="navbar.jsp"%>
 
 	<main role="main" class="container">
@@ -81,5 +61,26 @@
 			</tbody>
 		</table>
 	</main>
+
+	<!-- 商品を削除する隠しフォームとJavascript -->
+	<form name="delete_form" action="item_list" method="post">
+		<input type="hidden" id="command" name="command" value="DELETE">
+		<input type="hidden" id="item_id" name="item_id">
+	</form>
+	<script type="text/javascript">
+		function item_delete(item_id, item_name) {
+			if(confirm('[' + item_id + '] ' + item_name + ' を削除します。よろしいですか？')) {
+				delete_form.item_id.value = item_id;
+				delete_form.submit();
+				return true;
+			} else {
+				return false;
+			}
+		}
+	</script>
+
+	<!-- jQueryとBootstrap -->
+	<script src="js/jquery-3.5.1.slim.min.js"></script>
+	<script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

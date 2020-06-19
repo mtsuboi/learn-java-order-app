@@ -1,5 +1,6 @@
 package com.example.order_app.logic;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import com.example.order_app.access.ItemAccessor;
@@ -31,7 +32,13 @@ public class ItemLogicImpl implements ItemLogic {
 	}
 
 	@Override
-	public void save(ItemForm itemForm) {
+	public List<Item> findByName(String itemName) {
+		// 商品を商品名(部分一致)で検索する
+		return itemAccessor.findByName(itemName);
+	}
+
+	@Override
+	public void save(ItemForm itemForm) throws SQLException {
 		Item item = new Item();
 		item.setItemId(itemForm.getItemId());
 		item.setItemName(itemForm.getItemName());
@@ -46,7 +53,7 @@ public class ItemLogicImpl implements ItemLogic {
 	}
 
 	@Override
-	public void delete(String itemId) {
+	public void delete(String itemId) throws SQLException {
 		// 商品を削除する
 		itemAccessor.delete(itemId);
 	}

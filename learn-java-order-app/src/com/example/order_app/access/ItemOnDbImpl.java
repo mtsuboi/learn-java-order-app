@@ -75,7 +75,39 @@ public class ItemOnDbImpl implements ItemAccessor {
 	}
 
 	@Override
-	public void add(Item item) {
+	public List<Item> findByName(String itemName) {
+		// 商品を商品名(部分一致)で抽出する
+		String sql = "SELECT item_id, item_name, item_price FROM items";
+		// 商品名の指定ありの場合だけ抽出条件を付与（指定が無ければ全件抽出）
+		if(itemName != null && !itemName.trim().isBlank()) {
+			sql = sql + " WHERE item_name LIKE ?";
+		}
+		List<Item> list = new ArrayList<Item>();
+
+		try(Connection con = getConnection();
+				PreparedStatement stmt = con.prepareStatement(sql)) {
+			if(itemName != null && !itemName.trim().isBlank()) {
+				stmt.setString(1, "%" + itemName + "%");
+			}
+			try(ResultSet rs = stmt.executeQuery()) {
+				while(rs.next()) {
+					Item item = new Item();
+					item.setItemId(rs.getString("item_id"));
+					item.setItemName(rs.getString("item_name"));
+					item.setItemPrice(rs.getInt("item_price"));
+					list.add(item);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	@Override
+	public void add(Item item) throws SQLException {
 		// 商品を追加する
 		String sql = "INSERT INTO items (item_id, item_name, item_price) VALUES (?, ?, ?)";
 
@@ -88,12 +120,13 @@ public class ItemOnDbImpl implements ItemAccessor {
 		} catch (SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
+			throw e;
 		}
 
 	}
 
 	@Override
-	public int update(Item item) {
+	public int update(Item item) throws SQLException {
 		// 商品を更新する
 		String sql = "UPDATE items SET item_name = ?, item_price = ? WHERE item_id = ?";
 
@@ -107,12 +140,13 @@ public class ItemOnDbImpl implements ItemAccessor {
 		} catch (SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
+			throw e;
 		}
 		return count;
 	}
 
 	@Override
-	public void delete(String itemId) {
+	public void delete(String itemId) throws SQLException {
 		// 商品を削除する
 		String sql = "DELETE FROM items WHERE item_id = ?";
 
@@ -123,6 +157,7 @@ public class ItemOnDbImpl implements ItemAccessor {
 		} catch (SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
+			throw e;
 		}
 
 	}

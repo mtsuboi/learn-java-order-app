@@ -13,6 +13,18 @@
         <servlet-name>itemEntry</servlet-name>
         <servlet-class>com.example.order_app.handler.ItemEntryServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>itemFind</servlet-name>
+        <servlet-class>com.example.order_app.handler.ItemFindServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>orderList</servlet-name>
+        <servlet-class>com.example.order_app.handler.OrderListServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>orderEntry</servlet-name>
+        <servlet-class>com.example.order_app.handler.OrderEntryServlet</servlet-class>
+    </servlet>
 
     <!-- サーブレットとURLのマッピング -->
     <servlet-mapping>
@@ -22,6 +34,18 @@
     <servlet-mapping>
         <servlet-name>itemEntry</servlet-name>
         <url-pattern>/item_entry</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>itemFind</servlet-name>
+        <url-pattern>/item_find</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>orderList</servlet-name>
+        <url-pattern>/order_list</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>orderEntry</servlet-name>
+        <url-pattern>/order_entry</url-pattern>
     </servlet-mapping>
 
     <!-- コンテキストルートにアクセスしたときに読み込むファイル -->

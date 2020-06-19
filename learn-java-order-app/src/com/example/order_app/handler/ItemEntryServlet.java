@@ -1,6 +1,7 @@
 package com.example.order_app.handler;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -27,26 +28,30 @@ public class ItemEntryServlet extends HttpServlet {
 		if(itemId == null || itemId.isEmpty()) {
 			// item_idパラメータなしの場合は新規モード
 			req.setAttribute("mode", FormMode.NEW);
+			RequestDispatcher dispatcher = req.getRequestDispatcher("item_entry.jsp");
+			dispatcher.forward(req, resp);
 		} else {
 			// item_idパラメータありの場合はDBから該当商品を検索
 			WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(this.getServletContext());
 			ItemLogic logic = (ItemLogic) context.getBean("aopItemLogic");
 			Item item = logic.findById(itemId);
 
-			if(item.getItemId().isEmpty()) {
-				// 検索できなかった場合は新規モード
-				req.setAttribute("mode", FormMode.NEW);
+			if(item.getItemId() == null || item.getItemId().isEmpty()) {
+				// 検索できなかった場合はエラー
+				req.setAttribute("message", "指定された商品は存在しません。別のユーザーに削除された可能性があります。");
+				RequestDispatcher dispatcher = req.getRequestDispatcher("error.jsp");
+				dispatcher.forward(req, resp);
 			} else {
 				// 検索できた場合は更新モード＆検索結果セット
 				req.setAttribute("mode", FormMode.UPDATE);
 				req.setAttribute("item_id", item.getItemId());
 				req.setAttribute("item_name", item.getItemName());
 				req.setAttribute("item_price", item.getItemPrice());
+				RequestDispatcher dispatcher = req.getRequestDispatcher("item_entry.jsp");
+				dispatcher.forward(req, resp);
 			}
 		}
 
-		RequestDispatcher dispatcher = req.getRequestDispatcher("item_entry.jsp");
-		dispatcher.forward(req, resp);
 	}
 
 	@Override
@@ -66,7 +71,12 @@ public class ItemEntryServlet extends HttpServlet {
 
 		if(errors == null || errors.isEmpty()) {
 			// エラーが無ければDBに保存して商品一覧画面に戻る
-			logic.save(itemForm);
+			try {
+				logic.save(itemForm);
+			} catch (SQLException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
 
 			resp.sendRedirect("/item_list");
 		} else {

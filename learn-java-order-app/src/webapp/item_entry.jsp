@@ -13,11 +13,7 @@
 <title>商品マスタ登録</title>
 </head>
 <body>
-	<script src="js/jquery-3.5.1.slim.min.js"></script>
-	<script src="js/bootstrap.bundle.min.js"></script>
-
 	<%@ include file="navbar.jsp"%>
-
 	<main role="main" class="container">
 		<h1>商品マスタ登録</h1>
 		<%@ include file="error_message.jsp"%>
@@ -40,5 +36,9 @@
 			<button type="button" class="btn btn-secondary" onclick="location.href='item_list'">戻る</button>
 		</form>
 	</main>
+
+	<!-- jQueryとBootstrap -->
+	<script src="js/jquery-3.5.1.slim.min.js"></script>
+	<script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

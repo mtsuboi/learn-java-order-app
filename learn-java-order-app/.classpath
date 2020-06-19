@@ -52,5 +52,6 @@
 	<classpathentry kind="lib" path="lib/taglibs-standard-impl-1.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/jstl-api-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jstl-impl-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.8.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -12,9 +12,6 @@
 <title>受注管理システム</title>
 </head>
 <body>
-	<script src="js/jquery-3.5.1.slim.min.js"></script>
-	<script src="js/bootstrap.bundle.min.js"></script>
-
 	<%@ include file="navbar.jsp"%>
 
 	<main role="main" class="container">
@@ -25,5 +22,9 @@
 			</p>
 		</div>
 	</main>
+
+	<!-- jQueryとBootstrap -->
+	<script src="js/jquery-3.5.1.slim.min.js"></script>
+	<script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
