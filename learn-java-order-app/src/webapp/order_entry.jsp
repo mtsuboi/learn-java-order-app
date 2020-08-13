@@ -33,12 +33,17 @@
 					<label for="order_date">受注日: </label>
 					<input type="date" class="form-control" name="order_date" id="order_date" value="${order_date}">
 				</div>
-				<c:if test="${order_status == 'SHIPPED'}">
-					<div class="form-group col-sm-4 col-lg-3">
+				<div class="form-group col-sm-4 col-lg-3">
+					<c:if test="${order_status == 'SHIPPED'}">
 						<label for="ship_date">出荷日: </label>
 						<input type="date" class="form-control" name="ship_date" id="ship_date" value="${ship_date}">
-					</div>
-				</c:if>
+					</c:if>
+				</div>
+				<div class="form-group col-sm-4 col-lg-3">
+					<label for="order_status">ステータス: </label>
+					<input type="text" class="form-control" name="order_status" id="order_status" value="${order_status.name}" disabled="disabled">
+					<input type="hidden" name="order_status_code" id="order_status_code" value="${order_status.code}">
+				</div>
 			</div>
 			<div class="form-row">
 				<div class="form-group col-sm-8 col-lg-5">
@@ -122,12 +127,28 @@
 				</table>
 			</div>
 			<div class="form-row">
-				<div class="form-group col-6">
+				<div class="form-group col-4">
 					<button type="submit" class="btn btn-primary" onclick="order_form.command.value='SAVE'">登録</button>
 					<button type="submit" class="btn btn-secondary" onclick="order_form.command.value='GOBACK'">戻る</button>
 				</div>
-				<div class="form-group col-6 text-right">
+				<div class="form-group col-6">
 					<c:if test="${mode == 'UPDATE'}">
+						<c:if test="${order_status == 'ORDER'}">
+							<a class="btn btn-info" href="delivery_note_print?order_id=${order_id}" target="_blank" role="button">出荷指示書印刷</a>
+							<button type="submit" class="btn btn-success" onclick="order_form.command.value='SHIPPING'">出荷作業開始</button>
+						</c:if>
+						<c:if test="${order_status == 'SHIPPING'}">
+							<a class="btn btn-info" href="delivery_note_print?order_id=${order_id}" target="_blank" role="button">出荷指示書印刷</a>
+							<button type="submit" class="btn btn-success" onclick="order_form.command.value='SHIPPED'">出荷完了</button>
+							<button type="submit" class="btn btn-secondary" onclick="order_form.command.value='ORDER'">受注に戻す</button>
+						</c:if>
+						<c:if test="${order_status == 'SHIPPED'}">
+							<button type="submit" class="btn btn-secondary" onclick="order_form.command.value='SHIPPING'">出荷作業中に戻す</button>
+						</c:if>
+					</c:if>
+				</div>
+				<div class="form-group col-2 text-right">
+					<c:if test="${mode == 'UPDATE' and order_status == 'ORDER'}">
 						<button type="submit" class="btn btn-secondary" onclick="order_form.command.value='DELETE'">削除</button>
 					</c:if>
 				</div>
@@ -173,9 +194,10 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary">選択</button>
+					<button type="button" class="btn btn-primary" id="item_select_btn" onclick="item_select();">選択</button>
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
 				</div>
+				<input type="hidden" id="target_row_no">
 			</div>
 		</div>
 	</div>
@@ -190,18 +212,32 @@
 		$(function() {
 			// 商品検索ダイアログ オープン
 			$('#item_search_dialog').on('show.bs.modal', function (event) {
-				var button = $(event.relatedTarget);
-				var row_no = button.data('whatever');
-				var modal = $(this);
-				modal.find('.modal-title').text('商品検索(明細' + row_no + '行目)');
+				var $button = $(event.relatedTarget);
+				var row_no = $button.closest('tr').index() + 1;
+				var $modal = $(this);
+				$modal.find('.modal-title').text('商品検索(明細' + row_no + '行目)');
+				// どの行で検索ダイアログを押したか控えておく
+				$('#target_row_no').val(row_no);
+				// 検索キーワードをクリア
 				$('#serach_item_name').val('');
-				$('#item_search_result tbody').html('<tr><td colspan="3">ここに検索結果が表示されます。</td></tr>');
+				// 選択ボタンを無効化しておく
+				$('#item_select_btn').prop('disabled',true);
+				// テーブルをクリア（メッセージ表示）
+				$('#item_search_result tbody').html('<tr class="message"><td colspan="3">ここに検索結果が表示されます。</td></tr>');
 			});
 
 			// 商品検索ダイアログ 行選択
 			$('#item_search_result').on('click', 'tr', function (event) {
-				$(this).parent().find('.selected').removeClass('selected');
-				$(this).addClass('selected');
+				// メッセージでない（検索結果の商品行である）場合のみ
+				if(!$(this).hasClass('message')) {
+					// 選択した行のクラスに"selected"を追加
+					$(this).parent().find('.selected').removeClass('selected');
+					$(this).addClass('selected');
+					// 選択ボタンを有効化
+					if($('#item_select_btn').prop('disabled')) {
+						$('#item_select_btn').prop('disabled',false);
+					}
+				}
 			});
 		});
 
@@ -209,22 +245,37 @@
 		function item_search() {
 			var url = "item_find?item_name=" + $('#serach_item_name').val();
 			var $targetTbody = $('#item_search_result tbody');
+			// テーブルをクリアする
 			$targetTbody.html('');
 			$.getJSON(url, function(json){
-				for(var item in json) {
-					var trHtml = "<tr>";
-					trHtml = trHtml + "<td>" + json[item].itemId + "</td>";
-					trHtml = trHtml + "<td>" + json[item].itemName + "</td>";
-					trHtml = trHtml + "<td>" + json[item].itemPrice + "</td>";
-					trHtml = trHtml + "</tr>";
-					$targetTbody.append(trHtml);
+				if(Object.keys(json).length > 0) {
+					// 検索結果が1件以上あればテーブルに表示
+					for(var item in json) {
+						var trHtml = "<tr>";
+						trHtml = trHtml + "<td>" + json[item].itemId + "</td>";
+						trHtml = trHtml + "<td>" + json[item].itemName + "</td>";
+						trHtml = trHtml + "<td>" + json[item].itemPrice + "</td>";
+						trHtml = trHtml + "</tr>";
+						$targetTbody.append(trHtml);
+					}
+				} else {
+					// 検索結果が無い場合はその旨メッセージ表示
+					$('#item_search_result tbody').html('<tr class="message"><td colspan="3">該当データはありません。</td></tr>');
 				}
 			});
 		}
 
-		// 商品検索（行選択）
+		// 商品検索（選択ボタン）
 		function item_select() {
-
+			var row_idx = parseInt($('#target_row_no').val()) - 1;
+			var $targetTr = $('#order_detail tbody tr').eq(row_idx);
+			var $selectedTr = $('#item_search_result .selected');
+			// 検索結果から選択した行の各項目を受注明細の該当行の各項目へ転記する
+			$targetTr.find('#item_id').val($selectedTr.find('td').eq(0).text());
+			$targetTr.find('#item_name').val($selectedTr.find('td').eq(1).text());
+			$targetTr.find('#item_price').val($selectedTr.find('td').eq(2).text());
+			// 検索ダイアログを閉じる
+			$('#item_search_dialog').modal('hide');
 		}
 
 		// 行追加
@@ -232,6 +283,7 @@
 			var $clonedTr = $('#order_detail tbody tr:last').clone();
 			var line_no = $('#order_detail tbody tr:last').index();
 			$clonedTr.find('#line_no').text(line_no+2);
+			$clonedTr.find('button').attr('data-whatever', line_no+2);
 			$clonedTr.find('input').val('');
 			$('#order_detail tbody').append($clonedTr);
 		}
@@ -246,6 +298,7 @@
 					$targetTr.remove();
 					$('#order_detail tbody tr').each(function(line_no) {
 						$(this).find('#line_no').text(line_no + 1);
+						$(this).find('button').attr('data-whatever', line_no + 1);
 					});
 				}
 			}

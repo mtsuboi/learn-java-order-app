@@ -31,6 +31,9 @@ public class OrderListServlet extends HttpServlet {
 			orderStatus = OrderStatus.getByCode(orderStatusCode);
 		}
 		List<Order> list = logic.findByStatus(orderStatus);
+
+		req.setAttribute("status_list", OrderStatus.values());
+		req.setAttribute("order_status", orderStatus);
 		req.setAttribute("list", list);
 
 		RequestDispatcher dispatcher = req.getRequestDispatcher("order_list.jsp");

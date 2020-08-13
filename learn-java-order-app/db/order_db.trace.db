@@ -172,3 +172,7 @@ DELETE FROM orders WHERE order_detail = ? [42122-196]
 	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:806)
 	at org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:938)
 	at java.base/java.lang.Thread.run(Thread.java:834)
+2020-06-21 12:13:02 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: 列 "ORDER_STATUS CHAR(1)" の値が長過ぎます: "'000002' (6)"
+Value too long for column "ORDER_STATUS CHAR(1)": "'000002' (6)"; SQL statement:
+UPDATE orders SET order_status = ? WHERE order_id = ? [22001-196]
