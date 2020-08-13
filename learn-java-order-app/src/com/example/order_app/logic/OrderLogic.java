@@ -17,6 +17,9 @@ public interface OrderLogic {
 	// 受注を保存する
 	void save(final OrderForm orderForm) throws SQLException;
 
+	// 受注ステータスを変更する
+	void changeStatus(final String orderId, final OrderStatus orderStatus) throws SQLException;
+
 	// 受注を削除する
 	void delete(final String orderId) throws SQLException;
 }

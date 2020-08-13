@@ -18,6 +18,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.example.order_app.constants.FormCommand;
 import com.example.order_app.constants.FormMode;
+import com.example.order_app.constants.OrderStatus;
 import com.example.order_app.dto.OrderForm;
 import com.example.order_app.dto.OrderFormDetail;
 import com.example.order_app.logic.OrderLogic;
@@ -36,6 +37,7 @@ public class OrderEntryServlet extends HttpServlet {
 			DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			LocalDateTime now = LocalDateTime.now();
 			req.setAttribute("order_date", dateFormat.format(now));
+			req.setAttribute("order_status", OrderStatus.ORDER);
 			// 明細の1行目だけ空行を用意しておく
 			OrderFormDetail orderFormDetail = new OrderFormDetail();
 			orderFormDetail.setOrderDetailNo("1");
@@ -60,7 +62,9 @@ public class OrderEntryServlet extends HttpServlet {
 				// 検索できた場合は更新モード＆検索結果セット
 				req.setAttribute("mode", FormMode.UPDATE);
 				req.setAttribute("order_id", orderForm.getOrderId());
+				req.setAttribute("order_status", orderForm.getOrderStatus());
 				req.setAttribute("order_date", orderForm.getOrderDate());
+				req.setAttribute("ship_date", orderForm.getShipDate());
 				req.setAttribute("customer_name", orderForm.getCustomerName());
 				req.setAttribute("customer_zipcode", orderForm.getCustomerZipcode());
 				req.setAttribute("customer_address", orderForm.getCustomerAddress());
@@ -85,6 +89,7 @@ public class OrderEntryServlet extends HttpServlet {
 			// パラメータから入力値を取得（ヘッダ部）
 			orderForm.setMode(req.getParameter("mode"));
 			orderForm.setOrderId(req.getParameter("order_id"));
+			orderForm.setOrderStatus(OrderStatus.getByCode(req.getParameter("order_status_code")));
 			orderForm.setOrderDate(req.getParameter("order_date"));
 			orderForm.setCustomerName(req.getParameter("customer_name"));
 			orderForm.setCustomerZipcode(req.getParameter("customer_zipcode"));
@@ -119,11 +124,10 @@ public class OrderEntryServlet extends HttpServlet {
 				try {
 					logic.save(orderForm);
 				} catch (SQLException e) {
-					// TODO 自動生成された catch ブロック
-					e.printStackTrace();
+					// 何もしない
 				}
 
-				resp.sendRedirect("/order_list");
+				resp.sendRedirect("/order_list?order_status=" + req.getParameter("order_status_code"));
 			} else {
 				// エラーがあったらエラーメッセージをフォームに表示
 				req.setAttribute("errors", errors);
@@ -131,6 +135,7 @@ public class OrderEntryServlet extends HttpServlet {
 				// フォームに入力値を戻す
 				req.setAttribute("mode", orderForm.getMode());
 				req.setAttribute("order_id", orderForm.getOrderId());
+				req.setAttribute("order_status", orderForm.getOrderStatus());
 				req.setAttribute("order_date", orderForm.getOrderDate());
 				req.setAttribute("customer_name", orderForm.getCustomerName());
 				req.setAttribute("customer_zipcode", orderForm.getCustomerZipcode());
@@ -141,17 +146,40 @@ public class OrderEntryServlet extends HttpServlet {
 				dispatcher.forward(req, resp);
 			}
 			break;
+		case ORDER:
+			try {
+				logic.changeStatus(req.getParameter("order_id"), OrderStatus.ORDER);
+			} catch (SQLException e) {
+				// 何もしない
+			}
+			resp.sendRedirect("/order_list?order_status=" + req.getParameter("order_status_code"));
+			break;
+		case SHIPPING:
+			try {
+				logic.changeStatus(req.getParameter("order_id"), OrderStatus.SHIPPING);
+			} catch (SQLException e) {
+				// 何もしない
+			}
+			resp.sendRedirect("/order_list?order_status=" + req.getParameter("order_status_code"));
+			break;
+		case SHIPPED:
+			try {
+				logic.changeStatus(req.getParameter("order_id"), OrderStatus.SHIPPED);
+			} catch (SQLException e) {
+				// 何もしない
+			}
+			resp.sendRedirect("/order_list?order_status=" + req.getParameter("order_status_code"));
+			break;
 		case DELETE:
 			try {
 				logic.delete(req.getParameter("order_id"));
 			} catch (SQLException e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
+				// 何もしない
 			}
-			resp.sendRedirect("/order_list");
+			resp.sendRedirect("/order_list?order_status=" + req.getParameter("order_status_code"));
 			break;
 		case GOBACK:
-			resp.sendRedirect("/order_list");
+			resp.sendRedirect("/order_list?order_status=" + req.getParameter("order_status_code"));
 			break;
 		default:
 			break;

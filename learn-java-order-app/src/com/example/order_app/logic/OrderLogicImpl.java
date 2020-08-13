@@ -3,6 +3,8 @@ package com.example.order_app.logic;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +57,7 @@ public class OrderLogicImpl implements OrderLogic {
 		}
 
 		orderForm.setOrderId(order.getOrderId());
-		orderForm.setOrderStatus(order.getOrderStatus().getCode());
+		orderForm.setOrderStatus(order.getOrderStatus());
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		if(order.getOrderDate() != null) {
 			orderForm.setOrderDate(dateFormat.format(order.getOrderDate()));
@@ -97,6 +99,10 @@ public class OrderLogicImpl implements OrderLogic {
 			orderId = orderAccessor.numberingOrderId();
 		} else {
 			orderId = orderForm.getOrderId();
+			// 受注明細を削除する
+			orderDetailAccessor.deleteByOrderId(orderId);
+			// 受注を削除する
+			orderAccessor.delete(orderId);
 		}
 
 		// 受注明細を追加しながら、受注金額を集計する
@@ -118,7 +124,7 @@ public class OrderLogicImpl implements OrderLogic {
 		// 受注を追加する
 		Order order = new Order();
 		order.setOrderId(orderId);
-		order.setOrderStatus(OrderStatus.ORDER);
+		order.setOrderStatus(orderForm.getOrderStatus());
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		try {
 			Date orderDate = dateFormat.parse(orderForm.getOrderDate());
@@ -132,6 +138,16 @@ public class OrderLogicImpl implements OrderLogic {
 		order.setOrderAmount(orderAmount);
 		orderAccessor.add(order);
 
+	}
+
+	@Override
+	public void changeStatus(String orderId, OrderStatus orderStatus) throws SQLException {
+		// 出荷の場合は出荷日に現在日付を渡す
+		if(orderStatus == OrderStatus.SHIPPED) {
+			orderAccessor.update(orderId, orderStatus, new Date());
+		} else {
+			orderAccessor.update(orderId, orderStatus, null);
+		}
 	}
 
 	@Override

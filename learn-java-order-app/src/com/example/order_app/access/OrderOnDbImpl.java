@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -30,7 +31,7 @@ public class OrderOnDbImpl implements OrderAccessor {
 	@Override
 	public List<Order> findByStatus(OrderStatus orderStatus) {
 		// 受注をステータス指定で抽出する
-		String sql = "SELECT order_id, order_status, order_date, ship_date, customer_name, customer_zipcode, customer_address, order_amount FROM orders WHERE order_status = ?";
+		String sql = "SELECT order_id, order_status, order_date, ship_date, customer_name, customer_zipcode, customer_address, order_amount FROM orders WHERE order_status = ? ORDER BY order_id";
 		List<Order> list = new ArrayList<Order>();
 
 		try(Connection con = getConnection();
@@ -135,6 +136,30 @@ public class OrderOnDbImpl implements OrderAccessor {
 			throw e;
 		}
 
+	}
+
+	@Override
+	public int update(String orderId, OrderStatus orderStatus, Date shipDate)  throws SQLException {
+		// 受注ステータスと出荷日を更新する
+		String sql = "UPDATE orders SET order_status = ?, ship_date = ? WHERE order_id = ?";
+
+		int count = 0;
+		try(Connection con = getConnection();
+				PreparedStatement stmt = con.prepareStatement(sql)) {
+			stmt.setString(1, orderStatus.getCode());
+			if(shipDate == null) {
+				stmt.setNull(2, java.sql.Types.DATE);
+			} else {
+				stmt.setDate(2, new java.sql.Date(shipDate.getTime()));
+			}
+			stmt.setString(3, orderId);
+			count = stmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+			throw e;
+		}
+		return count;
 	}
 
 	@Override

@@ -1,25 +1,25 @@
 package com.example.order_app.dto;
 
 public class OrderDetail {
-	private String orderId;
 	private int orderDetailNo;
+	private String orderId;
 	private String itemId;
 	private String itemName;
 	private int itemPrice;
 	private int orderQuantity;
 	private int orderDetailAmount;
 
-	public String getOrderId() {
-		return orderId;
-	}
-	public void setOrderId(String orderId) {
-		this.orderId = orderId;
-	}
 	public int getOrderDetailNo() {
 		return orderDetailNo;
 	}
 	public void setOrderDetailNo(int orderDetailNo) {
 		this.orderDetailNo = orderDetailNo;
+	}
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 	public String getItemId() {
 		return itemId;

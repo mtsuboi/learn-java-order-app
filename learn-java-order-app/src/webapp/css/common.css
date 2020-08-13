@@ -19,3 +19,7 @@ body {
     -ms-overflow-style: -ms-autohiding-scrollbar;
     -webkit-overflow-scrolling: touch;
 }
+
+#item_search_result .selected {
+	background-color: skyblue !important;
+}

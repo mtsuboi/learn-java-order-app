@@ -2,10 +2,12 @@ package com.example.order_app.dto;
 
 import java.util.List;
 
+import com.example.order_app.constants.OrderStatus;
+
 public class OrderForm {
 	private String mode;
 	private String orderId;
-	private String orderStatus;
+	private OrderStatus orderStatus;
 	private String orderDate;
 	private String shipDate;
 	private String customerName;
@@ -27,10 +29,10 @@ public class OrderForm {
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
-	public String getOrderStatus() {
+	public OrderStatus getOrderStatus() {
 		return orderStatus;
 	}
-	public void setOrderStatus(String orderStatus) {
+	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
 	}
 	public String getOrderDate() {
